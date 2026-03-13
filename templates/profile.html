@@ -15,7 +15,7 @@
         <!-- Added Email Display -->
         <div class="flex items-center justify-center space-x-2 mb-4 text-slate-500">
             <i class="fas fa-envelope text-sm text-slate-400"></i>
-            <span class="text-sm font-medium">{{ username }}@secure-demo.app</span>
+            <span class="text-sm font-medium">{{ email or (username ~ '@secure-demo.app') }}</span>
         </div>
 
         <span class="inline-block px-3 py-1 bg-slate-100 text-slate-500 text-xs font-bold uppercase tracking-wider rounded-full mb-8">User</span>

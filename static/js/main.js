@@ -39,7 +39,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ payload: payload, action_type: actionType })
             })
-            .then(response => response.json())
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Analysis failed.');
+                }
+                return data;
+            })
             .then(data => {
                 // Update Result UI (Live Demo version or Fallback)
                 if (window.updateAnalysisUI_Result) {
@@ -54,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(err => {
                 console.error("SmartGuard Error:", err);
                 if (window.resetSimulator) window.resetSimulator();
-                alert("Error connecting to SmartGuard backend.");
+                alert(err.message || "Error connecting to SmartGuard backend.");
             });
         });
     });

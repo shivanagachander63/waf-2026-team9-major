@@ -89,9 +89,9 @@
                     <div id="pipe-decision" class="pipe-node w-8 h-8 rounded-full border-2 flex items-center justify-center mb-1.5 bg-white z-10"><i class="fas fa-filter text-xs"></i></div>
                     <span>Enforcement</span>
                 </div>
-                <div id="line-4" class="pipe-line h-0.5 flex-grow -mx-2 z-0 relative">
-                    <div id="block-x" class="absolute inset-0 flex items-center justify-center text-red-500 hidden"><i class="fas fa-times-circle bg-white rounded-full text-sm shadow-sm"></i></div>
-                </div>
+                    <div id="line-4" class="pipe-line h-0.5 flex-grow -mx-2 z-0 relative">
+                        <div id="block-x" class="absolute inset-0 flex items-center justify-center text-red-500 hidden pointer-events-none"><i class="fas fa-times-circle bg-white rounded-full text-sm shadow-sm"></i></div>
+                    </div>
                 
                 <div class="flex flex-col items-center w-20">
                     <div id="pipe-app" class="pipe-node w-8 h-8 rounded-full border-2 flex items-center justify-center mb-1.5 bg-white z-10"><i class="fas fa-database text-xs"></i></div>
@@ -498,7 +498,6 @@
                     ['browser', 'edge', 'ml', 'decision'].forEach(n => document.getElementById(`pipe-${n}`).classList.add('node-safe'));
                 } else {
                     document.getElementById('line-4').classList.add('blocked');
-                    document.getElementById('block-x').classList.remove('hidden');
                     document.getElementById('pipe-app').classList.add('node-blocked');
                     ['edge', 'ml', 'decision'].forEach(n => document.getElementById(`pipe-${n}`).classList.add('node-blocked'));
                 }
