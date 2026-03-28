@@ -6,7 +6,7 @@ import re
 import joblib
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime, timezone
 import lime.lime_tabular
 import warnings
 
@@ -33,6 +33,7 @@ def init_db():
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
+                email TEXT UNIQUE,
                 password TEXT NOT NULL
             )
         ''')
@@ -49,8 +50,47 @@ def init_db():
                 FOREIGN KEY (user_id) REFERENCES users (id)
             )
         ''')
+
+        # Lightweight migration for older DBs created before the email column existed.
+        user_columns = [row['name'] for row in db.execute('PRAGMA table_info(users)').fetchall()]
+        if 'email' not in user_columns:
+            db.execute('ALTER TABLE users ADD COLUMN email TEXT')
+
+        # # Demo reset requirement: start each run with a clean users/logs state.
+        # db.execute('DELETE FROM logs')
+        # db.execute('DELETE FROM users')
+
         db.commit()
         db.close() # Explicitly close the init connection
+
+
+@app.template_filter('format_log_timestamp')
+def format_log_timestamp(ts_value):
+    """Format DB timestamps consistently for dashboard UI (UTC display)."""
+    if not ts_value:
+        return "-"
+
+    ts_str = str(ts_value).strip()
+    parse_formats = [
+        '%Y-%m-%d %H:%M:%S',
+        '%Y-%m-%d %H:%M:%S.%f',
+        '%Y-%m-%dT%H:%M:%S',
+        '%Y-%m-%dT%H:%M:%S.%f',
+    ]
+
+    parsed = None
+    for fmt in parse_formats:
+        try:
+            parsed = datetime.strptime(ts_str, fmt)
+            break
+        except ValueError:
+            continue
+
+    if parsed is None:
+        return ts_str
+
+    parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.strftime('%d %b %Y, %H:%M:%S UTC')
 
 # --- 2. ML Model Loading ---
 MODEL_DIR = 'models'
@@ -191,7 +231,7 @@ def hybrid_decision_engine(ml_pred, ml_conf, payload, raw_features_dict):
     # A. If Rule Based says Attack -> BLOCK (Always trust specific signature if found)
     if rule_verdict != "Normal":
         final_decision = "BLOCKED"
-        final_type = f"{rule_verdict} (Rule-Based)"
+        final_type = rule_verdict
         
     # B. Else If Clean (Strict or Textual) -> ACCEPT (Override ML paranoia)
     elif is_clean_strict or is_clean_text:
@@ -203,7 +243,7 @@ def hybrid_decision_engine(ml_pred, ml_conf, payload, raw_features_dict):
         CONFIDENCE_THRESHOLD = 0.70
         if ml_pred == 1 and ml_conf > CONFIDENCE_THRESHOLD:
             final_decision = "BLOCKED"
-            final_type = "Malicious Request (ML Detected)"
+            final_type = "Malicious Request"
         else:
             final_decision = "ACCEPTED"
             final_type = "Normal"
@@ -235,7 +275,7 @@ def analyze():
             'features': {'length': 0, 'special_chars': 0, 'sql_keywords': 0}
         }), 500
 
-    data = request.json
+    data = request.get_json(silent=True) or {}
     payload = data.get('payload', '')
     action_type = data.get('action_type', 'Unknown')
     
@@ -319,6 +359,31 @@ def analyze():
     }
     return jsonify(response)
 
+@app.route('/log_simulation', methods=['POST'])
+def log_simulation():
+    """Store demo-only synthetic events (e.g., rate-limit) in dashboard logs."""
+    if 'user_id' not in session:
+        return jsonify({'status': 'ignored', 'message': 'Login required for log persistence.'}), 200
+
+    data = request.get_json(silent=True) or {}
+    action_type = data.get('action_type', 'Extension Simulation')
+    payload = data.get('payload', 'demo extension simulation')
+    result = data.get('result', 'BLOCKED')
+    confidence = float(data.get('confidence', 0.99))
+    detected_type = data.get('detected_type', 'Rate Limit')
+
+    try:
+        db = get_db()
+        db.execute(
+            'INSERT INTO logs (user_id, action_type, payload, result, confidence, detected_type) VALUES (?, ?, ?, ?, ?, ?)',
+            (session['user_id'], action_type, payload, result, confidence, detected_type)
+        )
+        db.commit()
+        db.close()
+        return jsonify({'status': 'ok'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session: return redirect(url_for('login'))
@@ -340,7 +405,13 @@ def dashboard():
 @app.route('/profile')
 def profile():
     if 'user_id' not in session: return redirect(url_for('login'))
-    return render_template('profile.html', username=session.get('username'))
+    db = get_db()
+    user = db.execute('SELECT username, email FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    db.close()
+    if not user:
+        session.clear()
+        return redirect(url_for('login'))
+    return render_template('profile.html', username=user['username'], email=user['email'])
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -352,18 +423,23 @@ def login():
         try:
             db = get_db()
             if action == 'register':
+                email = request.form.get('email', '').strip().lower() or None
                 try:
                     hashed_pw = generate_password_hash(password)
-                    db.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, hashed_pw))
+                    db.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', (username, email, hashed_pw))
                     db.commit()
                     flash('Registration successful! Please login.', 'success')
                 except sqlite3.IntegrityError:
-                    flash('Username already exists.', 'danger')
+                    flash('Username or email already exists.', 'danger')
             elif action == 'login':
-                user = db.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+                user = db.execute(
+                    'SELECT * FROM users WHERE username = ? OR lower(email) = lower(?)',
+                    (username, username)
+                ).fetchone()
                 if user and check_password_hash(user['password'], password):
                     session['user_id'] = user['id']
                     session['username'] = user['username']
+                    session['email'] = user['email'] if 'email' in user.keys() else None
                     db.close()
                     return redirect(url_for('dashboard'))
                 else:
@@ -379,4 +455,4 @@ def logout(): session.clear(); return redirect(url_for('home'))
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5002)

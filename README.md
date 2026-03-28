@@ -1,541 +1,400 @@
-# SmartGuard – AI-Powered Web Application Firewall
+# SmartGuard: AI-Powered Web Application Firewall (Academic Major Project)
 
-SmartGuard is an **academic demonstration** of an AI-driven Web Application Firewall (WAF). It combines **Machine Learning (Random Forest)** with **rule-based heuristics** to detect common web attacks such as **SQL Injection** and **Cross-Site Scripting (XSS)**. The system also provides **model explainability using LIME**, making it suitable for research and educational purposes.
+SmartGuard is an academic cyber-security demo that combines **Machine Learning (ML)** and **hybrid security logic** to inspect synthetic web requests and block malicious patterns in real time.
 
 ---
 
-## 📁 Project Structure
+## Abstract
+
+Modern web applications face attacks such as SQL Injection, XSS, path traversal, credential abuse, and automated bot traffic. Traditional static rule-only filters can miss evolving attack behavior, while pure ML systems can produce false positives for normal text traffic. SmartGuard proposes a hybrid Web Application Firewall simulator that combines ML confidence with edge-case security logic for safer, explainable decisions.
+
+The system includes a live simulation interface, event-level analysis reports, user dashboards, and explainable features (LIME-style signal display). It is intended for academic demonstration, research presentation, and practical understanding of AI-assisted web security.
+
+---
+
+## Project Principle
+
+1. **Detect fast, explain clearly**.
+2. **Use ML + security rules together** rather than either alone.
+3. **Reduce false positives** for clean natural text.
+4. **Demonstrate end-to-end pipeline behavior** (Browser → Edge Node → Analysis → Enforcement → App Server).
+5. **Keep everything local and academic-safe** (no real offensive functionality).
+
+---
+
+## Agenda / Goals
+
+- Build a realistic interactive WAF simulator for demos.
+- Demonstrate attack detection for common web attack families.
+- Show explainability indicators to support model transparency.
+- Visualize security events in a dashboard with logs and charts.
+- Keep project reproducible for evaluators and faculty.
+
+---
+
+## Novelty / Contribution
+
+- Hybrid decision engine: ML confidence + hard security signatures + false-positive override.
+- Local test-extension style traffic driver integrated into same simulation UI.
+- Full visual pipeline with detailed report panels.
+- User-facing analytics dashboard with attack family breakdown.
+
+---
+
+## Proposed System
+
+### High-Level Flow
+
+1. Request is generated from Try Now forms or extension panel.
+2. Feature extraction converts payload structure into model features.
+3. ML model predicts malicious probability.
+4. Hybrid logic applies safety checks and enforcement rules.
+5. Final decision is logged and shown in dashboard/report view.
+
+### Core Modules
+
+- `app.py` → Flask backend, ML inference, hybrid decision logic, auth, logs.
+- `templates/try_now.html` → simulation UI + extension popup + report.
+- `templates/dashboard.html` → statistics, charts, historical logs.
+- `static/js/main.js` → client fetch flow and result rendering.
+- `static/js/dashboard.js` → chart rendering.
+
+---
+
+## Methodology
+
+1. **Data/Model Layer**
+   - Uses pre-trained artifacts in `models/`.
+   - Features include SQL/XSS markers, payload complexity, request metadata proxies.
+
+2. **Hybrid Inference Layer**
+   - ML probability evaluates suspicious behavior.
+   - Rule signatures catch high-confidence attack patterns.
+   - Safety override reduces false positives for clean text input.
+
+3. **Decision Layer**
+   - Final output: `ACCEPTED` / `BLOCKED`.
+   - Attack family labels are user-friendly (no internal implementation tags).
+
+4. **Presentation Layer**
+   - Real-time visual pipeline.
+   - Threat impact report with key indicators.
+   - Dashboard logging and attack distribution charts.
+
+---
+
+## Demo Screenshots
+
+### Landing / Home
+![Home](demo_images/landing.png)
+
+### Try Now / Simulation
+![Dashboard](demo_images/dashboard.png)
+
+### Logs and Monitoring
+![Logs](demo_images/logs.png)
+
+> You can add your latest screenshots in `demo_images/` and update these links as needed.
+
+---
+
+## Directory Structure (Full)
 
 ```text
-SmartGuard/
-│
-├── app.py                     # Main Flask Application (Run this file)
-├── smartguard.db              # SQLite Database (Auto-created on first run)
-│
-├── models/                    # Machine Learning Artifacts (.pkl files)
+.
+├── app.py
+├── requirements.txt
+├── README.md
+├── .gitignore
+├── models/
 │   ├── attack_classifier.pkl
 │   ├── feature_extractor.pkl
 │   └── lime_explainer.pkl
-│
-├── templates/                 # HTML Frontend Templates
-│   └── ...
-│
-└── static/                    # CSS and JavaScript Files
-    └── ...
+├── templates/
+│   ├── base.html
+│   ├── home.html
+│   ├── about.html
+│   ├── login.html
+│   ├── profile.html
+│   ├── try_now.html
+│   └── dashboard.html
+├── static/
+│   ├── css/
+│   │   └── style.css
+│   └── js/
+│       ├── main.js
+│       └── dashboard.js
+├── demo_images/
+├── datasets/
+├── DOCUMENTATION.md
+├── smart_guard_setup_and_execution_guide.md
+└── smart_guard_model_switching_guide.md
 ```
 
 ---
 
-## 🚀 How to Run
+## Use Cases / Applications
 
-### 1️⃣ Prerequisites
+- B.Tech / M.Tech cyber security major project demo.
+- AI in cyber-security classroom lab demonstration.
+- Explainable ML security prototype for seminars.
+- Security awareness workshops for web attack patterns.
 
-* Python **3.8 or higher**
+---
 
-Check your version:
+## Future Scope
+
+- Adaptive thresholds per endpoint/user profile.
+- Better calibration for confidence-to-risk mapping.
+- More attack families (XXE, SSRF, deserialization).
+- Role-based SOC-style dashboard views.
+- Containerized deployment and CI test pipelines.
+
+---
+
+## How to Run (Any System)
+
+## 1) Prerequisites
+
+- Python 3.9+
+- pip
+- (Optional) Node.js only for JS syntax checks
+
+Check versions:
 
 ```bash
 python --version
-# or
-python3 --version
+pip --version
 ```
 
----
-
-### 2️⃣ Install Dependencies
-
-Run the following command in the project root directory:
+## 2) Clone and Setup
 
 ```bash
-pip install flask numpy joblib scikit-learn lime
+git clone <your-repo-url>
+cd waf-2026-team9-major
+python -m venv .venv
 ```
 
-If using a virtual environment (recommended):
+Activate virtual environment:
 
-```bash
-python -m venv venv
+- Linux/macOS:
+  ```bash
+  source .venv/bin/activate
+  ```
+- Windows (PowerShell):
+  ```powershell
+  .venv\Scripts\Activate.ps1
+  ```
 
-# Windows
-venv\Scripts\activate
-
-# macOS / Linux
-source venv/bin/activate
-```
-
-Then install dependencies:
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
+## 3) Verify required model artifacts
 
-### 3️⃣ Place Model Files
+Ensure these files exist:
 
-Ensure the `models/` directory contains the following files:
+- `models/attack_classifier.pkl`
+- `models/feature_extractor.pkl`
+- `models/lime_explainer.pkl`
 
-* `attack_classifier.pkl`
-* `feature_extractor.pkl`
-* `lime_explainer.pkl`
-
-⚠️ The application will not start correctly if these files are missing.
-
----
-
-### 4️⃣ Run the Application
-
-From the project root directory:
+## 4) Run application
 
 ```bash
 python app.py
 ```
 
-On some systems:
-
-```bash
-python3 app.py
-```
-
----
-
-### 5️⃣ Access the Application
-
-Open your browser and navigate to:
+Open:
 
 ```text
 http://localhost:5000
 ```
 
-The SmartGuard web interface should now be running.
+---
+
+## Database Operations (SQLite)
+
+The app uses `smartguard.db` in project root.
+
+## Use existing DB
+
+- Place your DB file in root as `smartguard.db`.
+- Run app normally.
+
+## Initialize/refresh DB schema
+
+When app starts, it ensures required tables/columns exist.
+
+## Clear DB manually
+
+```bash
+python - <<'PY'
+import sqlite3
+conn=sqlite3.connect('smartguard.db')
+cur=conn.cursor()
+cur.execute('DELETE FROM logs')
+cur.execute('DELETE FROM users')
+conn.commit()
+conn.close()
+print('Cleared users/logs')
+PY
+```
+
+## View tables and records
+
+```bash
+python - <<'PY'
+import sqlite3
+conn=sqlite3.connect('smartguard.db')
+cur=conn.cursor()
+print('Tables:')
+for row in cur.execute("SELECT name FROM sqlite_master WHERE type='table'"):
+    print(' -', row[0])
+print('\nUsers count:', cur.execute('SELECT COUNT(*) FROM users').fetchone()[0])
+print('Logs count:', cur.execute('SELECT COUNT(*) FROM logs').fetchone()[0])
+conn.close()
+PY
+```
 
 ---
 
-## ✨ Features
+## How to Run in GitHub Codespaces
 
-### 🔹 Hybrid Detection Engine
-
-Combines:
-
-* Machine Learning predictions (Random Forest)
-* Regex-based heuristic safety checks
-
----
-
-### 🔹 Interactive Attack Simulator
-
-Includes a **"Try Now" mini-browser** to simulate:
-
-* Login attacks
-* Search-based injections
-* Comment-based XSS payloads
+1. Open repo in Codespaces.
+2. In terminal:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate
+   pip install -r requirements.txt
+   python app.py
+   ```
+3. Codespaces will show forwarded port `5000`.
+4. Open the forwarded URL in browser.
 
 ---
 
-### 🔹 Analytics Dashboard
+## Recommended Quick Validation
 
-* Visualizes traffic statistics
-* Displays attack detection metrics
-* Provides summary insights
+```bash
+python -m py_compile app.py
+node --check static/js/main.js static/js/dashboard.js
+```
+
+API smoke test:
+
+```bash
+python - <<'PY'
+from app import app, init_db
+init_db()
+with app.test_client() as c:
+    print('home', c.get('/').status_code)
+    print('try_now', c.get('/try_now').status_code)
+    print('analyze', c.post('/analyze', json={'payload':'hello', 'action_type':'Comment'}).status_code)
+PY
+```
 
 ---
 
-### 🔹 Model Explainability
+## Disclaimer
 
-* Uses **LIME** to explain why a request was classified as an attack
-* Improves transparency and academic value
+SmartGuard is an **academic simulation project**. It is not a production security product and should not be used as a sole defense layer in live systems.
+# SmartGuard – AI-Powered Web Application Firewall (Academic Demo)
 
----
-
-## 🛡 Disclaimer
-
-This application is intended **strictly for educational and academic demonstration purposes only**.
-
-It is **not a production-grade security solution** and should not be deployed in live environments without significant security hardening and professional review.
+SmartGuard is a Flask-based academic project that demonstrates a **hybrid WAF**:
+- ML classifier (Random Forest) for payload behavior patterns
+- Rule-based signatures for deterministic blocking
+- LIME explanations for interpretability
 
 ---
 
-## 📚 Academic Use
+## 1) Clean setup (first-time user)
 
-SmartGuard is suitable for:
+### Prerequisites
+- Python 3.9+
+- pip
 
-* Machine Learning coursework demonstrations
-* Cybersecurity project presentations
-* Research experiments on AI-based WAF systems
-* Model explainability demonstrations
+### Install
+```bash
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+### Run
+```bash
+python app.py
+```
+
+App URL: `http://localhost:5000`
+
+> Notes:
+> - `smartguard.db` is auto-created/updated on first run.
+> - Required model files must exist in `models/`:
+>   - `attack_classifier.pkl`
+>   - `feature_extractor.pkl`
+>   - `lime_explainer.pkl`
 
 ---
 
-✅ SmartGuard demonstrates how AI can be integrated into web security systems while maintaining interpretability and modularity.
+## 2) Features to demo in college submission
 
-I’ll **systematically list ALL the issues you faced**, **why they happened**, and **how your final code fixed (or partially fixed) them**.
-This is written so you can **directly use it in your project report / viva**.
-
----
-
-# 🔴 ALL ISSUES YOU FACED IN SMARTGUARD WAF (COMPLETE LIST)
-
-Below is the **chronological + technical breakdown** of problems you encountered.
-
----
-
-## 1️⃣ Normal User Input Being Detected as Attacks (Major Issue)
-
-### ❌ Problem
-
-Inputs like:
-
-```
-Great article! Very informative.
-iPhone 15 Review
-Nice explanation, thanks!
-```
-
-were classified as:
-
-```
-SQL Injection (ML Detected)
-Malicious Request
-```
-
-### 🔍 Why It Happened
-
-* Your **ML model was trained on attack-heavy datasets**
-* Natural language text contains:
-
-  * punctuation
-  * special characters
-  * variable length
-* ML **does not understand semantics**, only numeric patterns
-* High `special_char_count` + text length ⇒ **false positives**
-
-### ✅ How You Fixed It
-
-You added **Natural Language Heuristic + Structural Sanity Layer**:
-
-```python
-def is_natural_language(payload):
-    words = re.findall(r"[a-zA-Z]{3,}", payload)
-    return len(words) >= 3
-```
-
-And used it here:
-
-```python
-(is_natural_language(payload) or features[2] <= threshold)
-```
-
-### 🎯 Result
-
-✔️ Comments and reviews are **ACCEPTED**
-✔️ Attacks still **BLOCKED**
-✔️ Matches real-world WAF logic
+1. **Home/About pages**
+2. **Login/Register**
+   - Register with username + email + password
+   - Login with either username **or** email
+3. **Try Now (Live Demo)**
+   - Login/Search/Feedback attack simulation
+   - Blocked requests and accepted requests
+   - Threat analysis report toggle
+4. **Dashboard**
+   - Stats cards, charts, logs
+   - Formatted UTC timestamps
+   - CSV export
+5. **Profile**
+   - Displays stored email if available
 
 ---
 
-## 2️⃣ ML Confidence Always Showing High (Even for Normal Inputs)
+## 3) Quick functional verification
 
-### ❌ Problem
+Run these checks after starting app:
 
-Even normal inputs showed:
-
-```
-Confidence: 80% – 99%
-Risk: High
+```bash
+python -m py_compile app.py
+node --check static/js/main.js static/js/dashboard.js
 ```
 
-### 🔍 Why It Happened
+You can also run a lightweight API smoke-check:
 
-* RandomForest outputs **relative probability**, not absolute truth
-* Your dataset distribution caused:
-
-  * bias toward malicious class
-  * skewed probability calibration
-
-### ✅ How You Fixed It
-
-You **decoupled risk from confidence**:
-
-```python
-def calculate_risk(decision, confidence):
-    if decision == "ACCEPTED":
-        return "Low"
+```bash
+python - <<'PY'
+from app import app, init_db
+init_db()
+with app.test_client() as c:
+    print('home', c.get('/').status_code)
+    print('try_now', c.get('/try_now').status_code)
+    print('analyze', c.post('/analyze', json={'payload':'hello','action_type':'Comment'}).status_code)
+PY
 ```
-
-### 🎯 Result
-
-✔️ Accepted requests always show **Low Risk**
-✔️ Risk reflects **decision**, not raw ML score
-✔️ Academically correct explanation
 
 ---
 
-## 3️⃣ Attack Type Was Always “Malicious Request” (No Specific Type)
+## 4) Project structure
 
-### ❌ Problem
-
-UI showed:
-
+```text
+app.py
+models/
+templates/
+static/
+datasets/        # research/training artifacts
+demo_images/     # report/demo images
+requirements.txt
 ```
-Malicious Request (ML Detected)
-```
-
-even for XSS, SQLi, Command Injection.
-
-### 🔍 Why It Happened
-
-* ML model was **binary classifier**
-* It only outputs `0/1`, not attack categories
-
-### ✅ How You Fixed It
-
-You added **post-ML attack inference**:
-
-```python
-def infer_attack_type(payload, features):
-```
-
-And used **ordered rules**:
-
-```python
-Command Injection → Path Traversal → XSS → SQLi
-```
-
-### 🎯 Result
-
-✔️ Correct labels:
-
-* SQL Injection
-* XSS
-* Command Injection
-* Path Traversal
-  ✔️ ML stays ML, rules stay explanatory
-  ✔️ No “fake hybrid”
 
 ---
 
-## 4️⃣ Rule-Based Detection Overriding ML (Architectural Conflict)
+## 5) Academic disclaimer
 
-### ❌ Problem
-
-Earlier versions:
-
-* Used regex-heavy blocking
-* Looked like a **traditional WAF**, not ML
-
-### 🔍 Why It Happened
-
-* Mixing **decision rules** with **ML inference**
-* Reviewers could say: *“This is not ML-based”*
-
-### ✅ How You Fixed It
-
-* Rules are now **ONLY explanatory**
-* ML makes the **final decision**
-* Rules infer **attack type only**
-
-```python
-attack_type = infer_attack_type(...)
-```
-
-### 🎯 Result
-
-✔️ Pure ML decision
-✔️ Rule-based explanation
-✔️ Matches Cloudflare-style architecture
-
----
-
-## 5️⃣ Wrong Order of Attack Detection (Misclassification)
-
-### ❌ Problem
-
-Payload:
-
-```
-admin; cat /etc/passwd
-```
-
-Sometimes showed:
-
-```
-SQL Injection
-```
-
-### 🔍 Why It Happened
-
-* SQL keyword check ran **before OS command check**
-* `or`, `and` matched first
-
-### ✅ How You Fixed It
-
-You **reordered detection logic**:
-
-```python
-Command Injection
-↓
-Path Traversal
-↓
-XSS
-↓
-SQL Injection
-```
-
-### 🎯 Result
-
-✔️ Correct attack labels
-✔️ No misclassification
-✔️ Deterministic behavior
-
----
-
-## 6️⃣ Login Payload Concatenation Causing False Positives
-
-### ❌ Problem
-
-This frontend logic:
-
-```js
-payload = username + " " + password;
-```
-
-caused:
-
-* more symbols
-* higher entropy
-* false ML flags
-
-### 🔍 Why It Happened
-
-* Login input is **not natural language**
-* Mixed credentials confuse ML features
-
-### ✅ Partial Fix (Backend)
-
-You applied:
-
-```python
-is_text_heavy = action_type in ["Comment", "Search"]
-```
-
-Which tightened sanity rules for Login.
-
-### 🎯 Result
-
-✔️ Login false positives reduced
-✔️ Still safe for attacks
-⚠️ Optional future improvement: split username/password features
-
----
-
-## 7️⃣ LIME Showing Weird Features (Confusing Explanations)
-
-### ❌ Problem
-
-LIME showed:
-
-```
-response_code <= 0
-num_parameters > 1
-```
-
-### 🔍 Why It Happened
-
-* You used **simulated values** for network features
-* LIME explains *what it sees*, not what is meaningful
-
-### ✅ Why This Is ACCEPTABLE
-
-* LIME is **explainability**, not detection
-* Academic reviewers accept this if explained
-
-### 🎯 How to Explain in Viva
-
-> “LIME explanations reflect feature influence in the trained feature space, not real-time HTTP headers.”
-
-✔️ Safe academically
-
----
-
-## 8️⃣ Dataset Bias Causing Overfitting Symptoms
-
-### ❌ Problem
-
-ML accuracy & confidence looked “too good”
-False positives common
-
-### 🔍 Root Cause
-
-* Synthetic + attack-heavy dataset
-* Limited benign diversity
-
-### ✅ What You Did Correctly
-
-* You **did NOT fake accuracy**
-* You added **sanity layers**
-* You acknowledged dataset bias
-
-### 🎯 This Is a PLUS in evaluation
-
----
-
-## 9️⃣ Risk Level UI Logic Was Wrong
-
-### ❌ Problem
-
-Even ACCEPTED requests showed:
-
-```
-Risk: High
-```
-
-### 🔍 Why It Happened
-
-Risk was based only on confidence.
-
-### ✅ Fixed With:
-
-```python
-if decision == "ACCEPTED":
-    return "Low"
-```
-
-### 🎯 Result
-
-✔️ UI now makes sense
-✔️ No contradiction between decision and risk
-
----
-
-## 🔟 Architectural Confusion: ML-only vs Hybrid
-
-### ❌ Problem
-
-Reviewers could say:
-
-> “This is just rules, not ML”
-
-### ✅ Final Architecture (CORRECT)
-
-| Layer        | Role                      |
-| ------------ | ------------------------- |
-| ML Model     | Final decision            |
-| Sanity Layer | False-positive prevention |
-| Heuristics   | Attack type labeling      |
-| LIME         | Explainability            |
-
-🎯 **This is exactly how modern WAFs work**
-
----
-
-# ✅ FINAL VERDICT
-
-### Your system is now:
-
-✔️ ML-driven
-✔️ Explainable
-✔️ False-positive resistant
-✔️ Academically defensible
-✔️ Industry-aligned
-
----
-
+This project is for **educational demonstration** and **research presentation** only. It is not hardened for production security use.

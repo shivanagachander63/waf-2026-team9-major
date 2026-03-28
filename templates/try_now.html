@@ -2,8 +2,22 @@
 
 {% block content %}
 <style>
-    /* Clean, light app background for realistic feel */
-    .app-theme-bg { background-color: #f1f5f9; }
+    :root {
+        --cyber-bg: #020617;
+        --cyber-panel: #0b1226;
+        --cyber-line: #1e293b;
+        --cyber-blue: #22d3ee;
+        --cyber-green: #34d399;
+        --cyber-red: #f87171;
+    }
+
+    /* Cyber security themed background */
+    .app-theme-bg {
+        background:
+            radial-gradient(circle at 15% 20%, rgba(34, 211, 238, 0.15), transparent 35%),
+            radial-gradient(circle at 80% 10%, rgba(52, 211, 153, 0.14), transparent 28%),
+            linear-gradient(180deg, #020617 0%, #0f172a 100%);
+    }
     
     /* Hide standard page footer to maximize app feel */
     footer { display: none !important; }
@@ -13,16 +27,38 @@
     details > summary::-webkit-details-marker { display: none; }
 
     /* Pipeline Animation Styles */
-    .pipe-node { transition: all 0.4s ease; border-color: #cbd5e1; color: #94a3b8; }
-    .pipe-line { transition: all 0.4s ease; background-color: #e2e8f0; }
+    .pipe-node { transition: all 0.4s ease; border-color: #334155; color: #64748b; }
+    .pipe-line { transition: all 0.4s ease; background-color: #1e293b; }
     
-    .node-active { border-color: #0ea5e9; color: #0ea5e9; box-shadow: 0 0 12px rgba(14, 165, 233, 0.2); }
-    .node-safe { border-color: #10b981; color: #10b981; box-shadow: 0 0 12px rgba(16, 185, 129, 0.2); }
-    .node-blocked { border-color: #ef4444; color: #ef4444; box-shadow: 0 0 12px rgba(239, 68, 68, 0.2); }
+    .node-active { border-color: var(--cyber-blue); color: var(--cyber-blue); box-shadow: 0 0 14px rgba(34, 211, 238, 0.35); }
+    .node-safe { border-color: var(--cyber-green); color: var(--cyber-green); box-shadow: 0 0 14px rgba(52, 211, 153, 0.35); }
+    .node-blocked { border-color: var(--cyber-red); color: var(--cyber-red); box-shadow: 0 0 14px rgba(248, 113, 113, 0.35); }
     
-    .pipe-line.active { background-color: #0ea5e9; }
-    .pipe-line.safe { background-color: #10b981; }
-    .pipe-line.blocked { background-color: #ef4444; }
+    .pipe-line.active { background-color: var(--cyber-blue); }
+    .pipe-line.safe { background-color: var(--cyber-green); }
+    .pipe-line.blocked { background-color: var(--cyber-red); }
+
+    .cyber-panel {
+        border: 1px solid var(--cyber-line);
+        box-shadow: 0 16px 38px rgba(2, 6, 23, 0.42);
+    }
+
+    .cyber-report {
+        border: 2px solid #cbd5e1;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .cyber-impact,
+    .cyber-metrics,
+    .cyber-lime {
+        border: 2px solid #cbd5e1;
+        border-radius: 10px;
+    }
+
+    .cyber-strong {
+        font-weight: 800;
+        letter-spacing: 0.02em;
+    }
 </style>
 
 <!-- Full Viewport Background -->
@@ -31,7 +67,7 @@
 <div class="max-w-4xl mx-auto pb-12 relative min-h-[calc(100vh-6rem)] mt-6">
     
     <!-- FULL PAGE BROWSER SHELL -->
-    <div class="bg-white rounded-xl overflow-hidden shadow-2xl shadow-slate-300 flex flex-col min-h-[650px] border border-slate-300">
+    <div class="bg-white rounded-xl overflow-hidden shadow-2xl shadow-slate-300 flex flex-col min-h-[650px] border border-slate-300 cyber-panel">
         
         <!-- Browser Header Controls -->
         <div class="bg-slate-100 border-b border-slate-200 py-2 px-4 flex items-center justify-between flex-shrink-0">
@@ -47,13 +83,83 @@
                 <span class="text-slate-400">localhost:5000/</span><span id="url-suffix" class="text-slate-800 font-medium">auth/login</span>
             </div>
             
-            <div class="w-24 text-right">
+            <div class="w-48 text-right flex items-center justify-end gap-2">
+                <button type="button" id="btn-open-extension" onclick="toggleExtensionPopup()" class="inline-flex items-center px-2.5 py-1 rounded bg-white text-slate-700 text-[10px] font-bold uppercase tracking-wider border border-slate-300 hover:bg-slate-50 transition">
+                    <i class="fas fa-puzzle-piece mr-1"></i> Extensions
+                </button>
                 <span class="inline-flex items-center px-2 py-1 rounded bg-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider border border-slate-300">
                     <i class="fas fa-network-wired mr-1"></i> Local
                 </span>
             </div>
         </div>
 
+        <!-- SmartGuard Test Extension Popup (Local Academic Simulation Only) -->
+        <div id="extension-popup" class="hidden absolute top-14 right-4 w-[370px] z-30">
+            <div class="bg-white border border-slate-300 rounded-xl shadow-2xl overflow-hidden">
+                <div class="px-4 py-3 bg-slate-900 text-white flex items-center justify-between">
+                    <h4 class="text-sm font-bold"><i class="fas fa-puzzle-piece mr-2 text-brand-300"></i>SmartGuard Test Extension</h4>
+                    <button type="button" id="btn-close-extension" onclick="toggleExtensionPopup(false)" class="text-slate-300 hover:text-white"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="p-4 space-y-3 text-xs">
+
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Traffic Type</label>
+                        <select id="ext-traffic-type" class="w-full border border-slate-300 rounded-md px-2.5 py-2 text-xs">
+                            <option>Normal User</option>
+                            <option>Suspicious User</option>
+                            <option>Bot Traffic</option>
+                            <option>Burst Traffic</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Attack Scenario</label>
+                        <select id="ext-attack-scenario" class="w-full border border-slate-300 rounded-md px-2.5 py-2 text-xs">
+                            <option>Safe Login</option>
+                            <option>SQL Injection</option>
+                            <option>XSS Payload</option>
+                            <option>Brute Force</option>
+                            <option>Credential Stuffing</option>
+                            <option>Header Spoofing</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Request Count</label>
+                        <input id="ext-count" type="number" min="1" max="100" value="6" class="w-full border border-slate-300 rounded-md px-2.5 py-2 text-xs">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Request Intensity</label>
+                            <select id="ext-intensity" class="w-full border border-slate-300 rounded-md px-2.5 py-2 text-xs">
+                                <option>Low</option>
+                                <option>Medium</option>
+                                <option>High</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Request Count</label>
+                            <input id="ext-count" type="number" min="1" max="100" value="6" class="w-full border border-slate-300 rounded-md px-2.5 py-2 text-xs">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Delay (ms)</label>
+                            <input id="ext-delay" type="number" min="50" max="5000" value="180" class="w-full border border-slate-300 rounded-md px-2.5 py-2 text-xs">
+                        </div>
+                        <label class="flex items-center mt-5 text-slate-700 font-semibold">
+                            <input id="ext-random-ua" type="checkbox" class="mr-2"> Randomize User-Agent
+                        </label>
+                    </div>
+
+                    <div class="flex gap-2 pt-1">
+                        <button id="btn-trigger-extension" onclick="triggerExtensionSimulation()" type="button" class="flex-1 py-2 bg-brand-600 text-white rounded-md font-bold hover:bg-brand-700">Trigger Simulation</button>
+                        <button id="btn-reset-extension" onclick="resetExtensionForm()" type="button" class="flex-1 py-2 bg-white border border-slate-300 text-slate-700 rounded-md font-bold hover:bg-slate-50">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+         </div>
         <!-- SmartGuard Edge Gateway Banner (Academic Context) -->
         <div class="bg-slate-900 text-cyan-400 text-[10px] font-mono py-1.5 px-6 flex justify-between items-center shadow-inner flex-shrink-0">
             <div class="flex items-center space-x-3">
@@ -87,11 +193,11 @@
                 
                 <div class="flex flex-col items-center w-24">
                     <div id="pipe-decision" class="pipe-node w-8 h-8 rounded-full border-2 flex items-center justify-center mb-1.5 bg-white z-10"><i class="fas fa-filter text-xs"></i></div>
-                    <span>Enforcement</span>
+                    <span>Filtering</span>
                 </div>
-                <div id="line-4" class="pipe-line h-0.5 flex-grow -mx-2 z-0 relative">
-                    <div id="block-x" class="absolute inset-0 flex items-center justify-center text-red-500 hidden"><i class="fas fa-times-circle bg-white rounded-full text-sm shadow-sm"></i></div>
-                </div>
+                    <div id="line-4" class="pipe-line h-0.5 flex-grow -mx-2 z-0 relative">
+                        <div id="block-x" class="absolute inset-0 flex items-center justify-center text-red-500 hidden pointer-events-none"><i class="fas fa-times-circle bg-white rounded-full text-sm shadow-sm"></i></div>
+                    </div>
                 
                 <div class="flex flex-col items-center w-20">
                     <div id="pipe-app" class="pipe-node w-8 h-8 rounded-full border-2 flex items-center justify-center mb-1.5 bg-white z-10"><i class="fas fa-database text-xs"></i></div>
@@ -271,7 +377,7 @@
                 </div>
 
                 <!-- COLLAPSIBLE DETAILED ANALYSIS -->
-                <div id="detailed-analysis-section" class="hidden bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden fade-in mt-4">
+                <div id="detailed-analysis-section" class="hidden bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden fade-in mt-4 cyber-report">
                     <div class="bg-slate-900 px-6 py-3 border-b border-slate-800 flex items-center">
                         <h4 class="text-white font-bold text-sm tracking-wide"><i class="fas fa-microchip mr-2 text-brand-400"></i> SmartGuard Academic Analysis Report</h4>
                     </div>
@@ -280,21 +386,21 @@
                         <!-- Security Impact -->
                         <div>
                             <h6 class="text-xs font-bold text-slate-800 mb-2 uppercase tracking-wide flex items-center"><i class="fas fa-radiation text-slate-400 mr-2"></i> Threat Impact Assessment</h6>
-                            <p id="det-impact" class="text-sm text-slate-600 bg-slate-50 p-4 rounded-lg border border-slate-200 leading-relaxed"></p>
+                            <p id="det-impact" class="text-sm text-slate-700 bg-slate-50 p-4 leading-relaxed cyber-impact cyber-strong"></p>
                         </div>
 
                         <div class="grid md:grid-cols-2 gap-6">
                             <!-- AI Reasoning -->
                             <div>
                                 <h6 class="text-xs font-bold text-slate-800 mb-2 uppercase tracking-wide flex items-center"><i class="fas fa-brain text-slate-400 mr-2"></i> Explainable AI Signals (LIME)</h6>
-                                <ul id="det-lime" class="space-y-2 text-sm text-slate-600 bg-slate-50 p-4 rounded-lg border border-slate-200 font-mono min-h-[100px]">
+                                <ul id="det-lime" class="space-y-2 text-sm text-slate-700 bg-slate-50 p-4 font-mono min-h-[100px] cyber-lime">
                                 </ul>
                             </div>
                             
                             <!-- Request Metrics -->
                             <div>
                                 <h6 class="text-xs font-bold text-slate-800 mb-2 uppercase tracking-wide flex items-center"><i class="fas fa-chart-pie text-slate-400 mr-2"></i> Pipeline Metrics</h6>
-                                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 font-mono text-sm space-y-3 min-h-[100px]">
+                                <div class="bg-slate-50 p-4 font-mono text-sm space-y-3 min-h-[100px] cyber-metrics">
                                     <div class="flex justify-between border-b border-slate-200 pb-2">
                                         <span class="text-slate-500">ML Confidence:</span> <span id="det-confidence" class="font-bold text-slate-800">-</span>
                                     </div>
@@ -341,7 +447,155 @@
         if (btnReset) {
             btnReset.onclick = resetSimulator;
         }
+
+        // Extension popup actions are wired via inline onclick handlers in markup
+        // to keep demo interactions explicit and easy to trace in presentations.
+        const btnOpenExt = document.getElementById('btn-open-extension');
+        const btnCloseExt = document.getElementById('btn-close-extension');
+        const btnResetExt = document.getElementById('btn-reset-extension');
+        const btnTriggerExt = document.getElementById('btn-trigger-extension');
+
+        if (btnOpenExt) btnOpenExt.onclick = toggleExtensionPopup;
+        if (btnCloseExt) btnCloseExt.onclick = () => toggleExtensionPopup(false);
+        if (btnResetExt) btnResetExt.onclick = resetExtensionForm;
+        if (btnTriggerExt) btnTriggerExt.onclick = triggerExtensionSimulation;
     });
+
+    function toggleExtensionPopup(forceState = null) {
+        const popup = document.getElementById('extension-popup');
+        if (!popup) return;
+        if (forceState === true) popup.classList.remove('hidden');
+        else if (forceState === false) popup.classList.add('hidden');
+        else popup.classList.toggle('hidden');
+    }
+
+    function resetExtensionForm() {
+        document.getElementById('ext-traffic-type').value = 'Normal User';
+        document.getElementById('ext-attack-scenario').value = 'Safe Login';
+        document.getElementById('ext-intensity').value = 'Low';
+        document.getElementById('ext-count').value = 6;
+        document.getElementById('ext-delay').value = 180;
+        document.getElementById('ext-random-ua').checked = false;
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function getScenarioPayload(scenario, attemptNo, randomUA) {
+        const suffix = randomUA ? ` ua-${Math.random().toString(36).slice(2, 7)}` : '';
+        if (scenario === 'Safe Login') return { mode: 'login', action: 'Login', payload: `demo_user safe_pass${suffix}` };
+        if (scenario === 'SQL Injection') return { mode: 'search', action: 'Search', payload: `' UNION SELECT username,password FROM users --${suffix}` };
+        if (scenario === 'XSS Payload') return { mode: 'comment', action: 'Comment', payload: `<script>alert('xss')<\/script>${suffix}` };
+        if (scenario === 'Brute Force') return { mode: 'login', action: 'Login', payload: `admin wrongpass${attemptNo}${suffix}` };
+        if (scenario === 'Credential Stuffing') return { mode: 'login', action: 'Login', payload: `user${attemptNo}@mail.com commonpass${suffix}` };
+        return { mode: 'search', action: 'Search', payload: `Mozilla spoof header test${suffix}` }; // Header Spoofing simulation
+    }
+
+    async function triggerExtensionSimulation() {
+        const trafficType = document.getElementById('ext-traffic-type').value;
+        const scenario = document.getElementById('ext-attack-scenario').value;
+        const intensity = document.getElementById('ext-intensity').value;
+        const randomUA = document.getElementById('ext-random-ua').checked;
+        const count = Math.min(100, Math.max(1, parseInt(document.getElementById('ext-count').value || '1', 10)));
+        const delay = Math.min(5000, Math.max(50, parseInt(document.getElementById('ext-delay').value || '150', 10)));
+
+        let runCount = count;
+        const intensityMultiplier = intensity === 'High' ? 3 : intensity === 'Medium' ? 2 : 1;
+        runCount = Math.min(100, count * intensityMultiplier);
+
+        const seed = getScenarioPayload(scenario, 1, randomUA);
+        switchTab(seed.mode);
+        toggleExtensionPopup(false);
+        window.updateAnalysisUI_Loading();
+
+        let lastData = null;
+        let blockedCount = 0;
+        let networkError = null;
+
+        for (let i = 1; i <= runCount; i++) {
+            const current = getScenarioPayload(scenario, i, randomUA);
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ payload: current.payload, action_type: current.action })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Simulation request failed.');
+                lastData = data;
+                if (data.decision === 'BLOCKED') blockedCount += 1;
+            } catch (err) {
+                networkError = err.message;
+                break;
+            }
+            await sleep(delay);
+        }
+
+        if (networkError) {
+            if (window.resetSimulator) window.resetSimulator();
+            alert(`Simulation error: ${networkError}`);
+            return;
+        }
+
+        const rateLimitLikely = (trafficType === 'Bot Traffic' || trafficType === 'Burst Traffic') && runCount >= 12;
+        if (rateLimitLikely && lastData) {
+            lastData.decision = 'BLOCKED';
+            lastData.detected_type = 'Rate Limit';
+            lastData.confidence = '99.00%';
+            lastData.risk_level = 'High';
+            lastData.harm_text = 'demo extension';
+            lastData.explanation = [
+                ['request_rate > threshold', 0.952],
+                ['traffic_pattern indicates automation', 0.901],
+                ['Filtering pipeline blocked request', 0.846]
+            ];
+            lastData.confidence = '99.00%';
+            lastData.risk_level = intensity === 'High' ? 'Critical' : 'High';
+            lastData.harm_text = 'Demo-only synthetic traffic surge detected. SmartGuard simulation applies local rate-limit style blocking in the filtering stage.';
+            lastData.explanation = [
+                ['synthetic_request_rate > threshold', 0.952],
+                ['traffic_pattern resembles bot/burst', 0.901],
+                ['Filtering policy = local demo rate-limit', 0.846]
+            ];
+            if (lastData.features) {
+                lastData.features.length = runCount;
+                lastData.features.special_chars = blockedCount;
+            }
+
+            // Persist one summarized rate-limit event so dashboard attack vectors show it.
+            try {
+                await fetch('/log_simulation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action_type: 'Extension Traffic Test',
+                        payload: `traffic=${trafficType}; scenario=${scenario}; count=${runCount}; delay=${delay}`,
+                        result: 'BLOCKED',
+                        confidence: 0.99,
+                        detected_type: 'Rate Limit'
+                    })
+                });
+            } catch (e) {
+                console.warn('Simulation log persistence failed:', e);
+            }
+        }
+
+        if (!lastData) {
+            if (window.resetSimulator) window.resetSimulator();
+            alert('Simulation did not produce any result.');
+            return;
+        }
+
+        currentRawRequest = `EXTENSION TRAFFIC SIMULATION\nTraffic Type: ${trafficType}\nScenario: ${scenario}\nRequests Sent: ${runCount}\nDelay: ${delay}ms\nRandomize UA: ${randomUA ? 'ON' : 'OFF'}\nBlocked Responses: ${blockedCount}`;
+        currentRawRequest = `DEMO-ONLY EXTENSION SIMULATION\nTraffic Type: ${trafficType}\nScenario: ${scenario}\nRequests Sent: ${runCount}\nDelay: ${delay}ms\nRandomize UA: ${randomUA ? 'ON' : 'OFF'}\nBlocked Responses: ${blockedCount}`;
+        currentRawRequest = `DEMO-ONLY EXTENSION SIMULATION\nTraffic Type: ${trafficType}\nScenario: ${scenario}\nIntensity: ${intensity}\nRequests Sent: ${runCount}\nDelay: ${delay}ms\nRandomize UA: ${randomUA ? 'ON' : 'OFF'}\nBlocked Responses: ${blockedCount}`;
+        window.updateAnalysisUI_Result(lastData, seed.action);
+    }
+
+    window.toggleExtensionPopup = toggleExtensionPopup;
+    window.resetExtensionForm = resetExtensionForm;
+    window.triggerExtensionSimulation = triggerExtensionSimulation;
 
     // 2. Tab Switching
     function switchTab(tabId) {
@@ -362,6 +616,8 @@
         document.getElementById('url-suffix').innerText = routes[tabId];
         resetPipeline();
     }
+
+    window.switchTab = switchTab;
 
     // 3. THE FIX: View Threat Analysis Report Toggle
     function toggleDetails(e) {
@@ -386,6 +642,8 @@
         document.getElementById('view-form').classList.remove('hidden');
         resetPipeline();
     }
+
+    window.resetSimulator = resetSimulator;
 
     // 4. UI Update Handlers (Called by main.js)
     window.updateAnalysisUI_Loading = function() {
@@ -498,7 +756,6 @@
                     ['browser', 'edge', 'ml', 'decision'].forEach(n => document.getElementById(`pipe-${n}`).classList.add('node-safe'));
                 } else {
                     document.getElementById('line-4').classList.add('blocked');
-                    document.getElementById('block-x').classList.remove('hidden');
                     document.getElementById('pipe-app').classList.add('node-blocked');
                     ['edge', 'ml', 'decision'].forEach(n => document.getElementById(`pipe-${n}`).classList.add('node-blocked'));
                 }
